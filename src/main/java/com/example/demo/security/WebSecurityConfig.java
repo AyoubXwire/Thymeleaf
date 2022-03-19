@@ -22,22 +22,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .passwordEncoder(passwordEncoder)
             .withUser("user").password(passwordEncoder.encode("123456")).roles("USER")
             .and()
-            .withUser("admin").password(passwordEncoder.encode("123456")).roles("ADMIN ");
+            .withUser("admin").password(passwordEncoder.encode("123456")).roles("ADMIN");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-            .antMatchers("/add-client","/show-client/**")
-            .hasRole("USER")
-            .antMatchers("/delete-client/**")
-            .hasRole("ADMIN")
-            .antMatchers("/clients","/")
-            .permitAll()
+        http
+            .authorizeRequests()
+            .antMatchers("/add-client", "/show-client/**", "/save-client").hasRole("USER")
+            .antMatchers("/delete-client/**").hasRole("ADMIN")
+            .antMatchers("/clients","/").permitAll()
             .anyRequest()
             .authenticated()
             .and()
             .formLogin()
             .defaultSuccessUrl("/clients");
-        }
     }
+
+}
