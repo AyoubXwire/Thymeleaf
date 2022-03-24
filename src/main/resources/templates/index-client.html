@@ -19,54 +19,58 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
+                <li sec:authorize="isAuthenticated()" class="nav-item" style="display:inline-block;color:#FFF;margin-top:6px;margin-right:60px;">
+                    <span>Signed in as </span>
+                    <span th:text="${#authentication.getPrincipal().getUsername()}"></span>
+                </li>
                 <li sec:authorize="isAuthenticated()" class="nav-item">
                     <a class="btn btn-outline-light"
                        th:href="@{/logout}">Logout</a>
                 </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Home
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Contact</a>
+                <li sec:authorize="isAnonymous()" class="nav-item">
+                    <a class="btn btn-outline-light"
+                       th:href="@{/login}">Login</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container">
+<div sec:authorize="isAnonymous()" class="container py-5">
+    <h4 class="text-center py-5">Please login to be able to use the app</h4>
+</div>
 
-    <div class="row">
-        <div class="col-sm-8">
+<div sec:authorize="isAuthenticated()" class="container py-5">
+
+    <div class="row add-form">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Ajouter client</h2>
+
             <form action="#" th:action="@{/add-client}" th:object="${client}" method="post">
                 <div class="form-group">
                     <input type="text" th:field="*{id}" id="id" placeholder="Id" readonly class="form-control">
                     <span th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></span>
                 </div>
                 <div class="form-group">
-                    <label for="name">Name</label>
                     <input type="text" th:field="*{name}" id="name" placeholder="Name" class="form-control">
                 </div>
-                <button type="submit" class="btn btn-success">Add Client</button>
+                <div style="display:flex;justify-content:flex-end;">
+                    <button sec:authorize="hasRole('USER')" type="submit" class="btn btn-success">Add Client</button>
+                    <button sec:authorize="hasRole('ADMIN')" type="submit" disabled class="btn btn-success">Add Client</button>
+                </div>
             </form>
         </div>
     </div>
 
 
-    <div class="row">
+    <div class="row mt-5 list-clients">
         <div class="col-lg-12">
+            <h2 class="text-center mb-4">Clients</h2>
+
             <table>
                 <thead>
                 <tr>
-                    <th scope="col">Photo</th>
+                    <th scope="col">Avatar</th>
                     <th scope="col">Id</th>
                     <th scope="col">Name</th>
                     <th scope="col">Actions</th>
@@ -76,19 +80,14 @@
                 <tr th:each="client : ${clients}">
                     <td>
                         <div class="event-img">
-                            <img
-                                    src="https://bootdey.com/img/Content/avatar/avatar3.png" alt=""/>
+                            <img th:src="@{${'https://ui-avatars.com/api/?name=' + client.name}}" alt="">
                         </div>
                     </td>
                     <td th:text="${client.id}"></td>
                     <td th:text="${client.name}"></td>
-                    <td>
-                        <a class="btn btn-primary"
-                           th:href="@{|/show-client/${client.id}|}">
-                            <i class="fa fa-edit fa-lg"></i> Edit</a>
-                        <a class="btn btn-danger"
-                           th:href="@{|/delete-client/${client.id}|}">
-                            <i class="fa fa-trash fa-lg"></i> Delete</a>
+                    <td style="display:flex;justify-content:flex-end;">
+                        <a sec:authorize="hasRole('USER')" class="btn btn-primary mr-3" th:href="@{|/show-client/${client.id}|}">Edit</a>
+                        <a sec:authorize="hasRole('ADMIN')" class="btn btn-danger" th:href="@{|/delete-client/${client.id}|}">Delete</a>
                     </td>
                 </tr>
                 </tbody>
